@@ -2,6 +2,7 @@ package org.example.minibank;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
@@ -11,6 +12,17 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler { //отловщик ошибок по всему приложению
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValid (MethodArgumentNotValidException ex){
+        Map<String, String> response = new HashMap<>();
+        response.put("status", "error");
+
+        String error = ex.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
+        response.put("message", error);
+
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(HandlerMethodValidationException.class) //ловит ошибки валидации(не все)
     public ResponseEntity<Map<String, String>> handleMethodValidationExceptions(HandlerMethodValidationException ex){

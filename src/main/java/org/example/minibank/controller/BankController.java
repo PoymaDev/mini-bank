@@ -3,15 +3,16 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import org.example.minibank.dto.AccountDTO;
+import org.example.minibank.dto.CreateAccountRequestDTO;
 import org.example.minibank.entity.Account;
 import org.example.minibank.service.BankService;
-import org.springframework.validation.annotation.Validated;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
 @RestController
-@Validated
+@Valid
 public class BankController {
 
     private final BankService bankService;
@@ -20,13 +21,12 @@ public class BankController {
         this.bankService = bankService;
     }
 
-    @GetMapping("/create")
-    public AccountDTO createAccount(
-            @RequestParam @NotBlank @Size(min = 4, max = 20) String number,
-            @RequestParam @NotBlank(message = "Имя не может быть пустым") String name,
-            @RequestParam @PositiveOrZero(message = "Баланс не может быть отрицательным") BigDecimal balance
-            ){
-        Account account = bankService.createAccount(number, name, balance);
+    @PostMapping("/create")
+    public AccountDTO createAccount(@Valid @RequestBody CreateAccountRequestDTO request){
+        Account account = bankService.createAccount(
+                request.getAccountNumber(),
+                request.getOwnerName(),
+                request.getInitialBalance());
         return new AccountDTO(account.getAccountNumber(), account.getOwnerName(), account.getBalance());
     }
 
